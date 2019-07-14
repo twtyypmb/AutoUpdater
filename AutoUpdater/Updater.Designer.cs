@@ -1,6 +1,6 @@
 ﻿namespace AutoUpdater
 {
-    partial class AutoUpdate
+    partial class Updater
     {
         /// <summary>
         /// Required designer variable.

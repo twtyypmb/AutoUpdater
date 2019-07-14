@@ -18,9 +18,9 @@ namespace AutoUpdater
     /// <summary>
     /// 
     /// </summary>
-    public partial class AutoUpdate : Form
+    public partial class Updater : Form
     {
-        public AutoUpdate()
+        public Updater()
         {
             InitializeComponent();
         }
