@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Windows.Forms;
 
 namespace AutoUpdater
@@ -14,6 +15,7 @@ namespace AutoUpdater
         [STAThread]
         static void Main( string[] args )
         {
+
             DefaultJsonConvertSetting();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
@@ -23,7 +25,15 @@ namespace AutoUpdater
             }
             else
             {
-                Application.Run( new ConfigForm() );
+                Application.Run( new Updater()
+                {
+                    Config = new Config.SelfConfig()
+                    {
+                        LinkTimes=-1,
+                        TimeSpan = 3000
+                    }
+
+                } );
             }
         }
 

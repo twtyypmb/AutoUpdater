@@ -12,6 +12,8 @@ using System.Threading;
 using System.IO;
 using System.Collections;
 using AutoUpdater.Config;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace AutoUpdater
 {
@@ -30,7 +32,7 @@ namespace AutoUpdater
             ControlHorizontally( tips );
         }
 
-        public static void ControlHorizontally(Control c)
+        public static void ControlHorizontally( Control c )
         {
             if( c.Parent == null )
             {
@@ -41,11 +43,53 @@ namespace AutoUpdater
 
         }
 
-        private string serverXmlFile;
-        private void AutoUpdate_Shown( object sender, EventArgs e )
+        private async void AutoUpdate_Shown( object sender, EventArgs e )
         {
-           
-           
+            if( Config?.AutoUpdaterConfig == null )
+            {
+                MessageBox.Show( "配置信息丢失" );
+                Close();
+                return;
+            }
+
+            HttpClient client = new HttpClient();
+            Stream stream = null;
+            string config = null;
+            while( Config.LinkTimes != 0 )
+            {
+                try
+                {
+                    config = await client.GetStringAsync( Config.AutoUpdaterConfig.RemoteUpdateConfig );
+                    
+                    break;
+                }
+                catch( Exception eeee)
+                {
+                    Config.LinkTimes--;
+                    await Task.Run( () => Thread.Sleep(Config.TimeSpan) );
+                }
+            }
+            AutoUpdaterConfig updater_config = null;
+            try
+            {
+                updater_config = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( config );
+            }
+            catch( Exception )
+            {
+                this.Close();
+                return;
+            }
+
+
+
+            await DownLoadFiles( updater_config );
+
+
+        }
+
+        private async Task DownLoadFiles( AutoUpdaterConfig updater_config )
+        {
+            
         }
 
         private void AutoUpdate_SizeChanged( object sender, EventArgs e )
@@ -62,7 +106,10 @@ namespace AutoUpdater
             ControlHorizontally( label_now_download );
         }
 
-        internal SelfConfig Config { get; set; }
+        internal SelfConfig Config
+        {
+            get; set;
+        }
     }
 }
 

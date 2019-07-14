@@ -8,5 +8,19 @@ namespace AutoUpdater.Config
 {
     class SelfConfig
     {
+        public int LinkTimes
+        {
+            get; set;
+        }
+
+        public int TimeSpan
+        {
+            get;set;
+        }
+
+        public AutoUpdaterConfig AutoUpdaterConfig
+        {
+            get;set;
+        }
     }
 }
