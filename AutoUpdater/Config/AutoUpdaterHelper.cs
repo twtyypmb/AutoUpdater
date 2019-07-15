@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace AutoUpdater.Config
 {
@@ -74,7 +75,7 @@ namespace AutoUpdater.Config
                     now_down( item.Name );
                     try
                     {
-                        using( var stream = await client.GetStreamAsync( $"{base_uri}/{now_path}/{item.Name} " ) )
+                        using( var stream = await client.GetStreamAsync( $"{base_uri}/{now_path}/{item.Name}" ) )
                         {
                             string download_item = Path.Combine( di.FullName, item.Name );
                             if( File.Exists( download_item ) )

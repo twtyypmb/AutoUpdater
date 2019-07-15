@@ -39,9 +39,9 @@ namespace AutoUpdater
                     if( ConfigurationManager.AppSettings.AllKeys.Contains( "config_file" ) )
                     {
                         config_file = ConfigurationManager.AppSettings["config_file"];
-                        updaterConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
+                        
                     }
-
+                    updaterConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
                 }
                 catch( Exception e )
                 {
