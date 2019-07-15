@@ -14,5 +14,10 @@ namespace AutoUpdater.Config
 
         public List<UpdateItem> UpdateList { get; set; } = new List<UpdateItem>();
 
+
+        public List<string> UpdateLog
+        {
+            get; set;
+        } = new List<string>();
     }
 }

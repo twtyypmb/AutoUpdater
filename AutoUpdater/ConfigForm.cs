@@ -26,11 +26,11 @@ namespace AutoUpdater
             List<Config.UpdateItem> list = new List<Config.UpdateItem>();
             if( checkBox1.Checked )
             {
-                GetUpdateItems( di, list, Application.ExecutablePath );
+                AutoUpdaterHelper.GenerateUpdateItems( di, list, Application.ExecutablePath );
             }
             else
             {
-                GetUpdateItems( di, list, null );
+                AutoUpdaterHelper.GenerateUpdateItems( di, list, null );
             }
             AutoUpdaterConfig config = new AutoUpdaterConfig();
 
@@ -50,47 +50,11 @@ namespace AutoUpdater
             config.UpdateList = list;
 
             File.WriteAllText( textBox1.Text, Newtonsoft.Json.JsonConvert.SerializeObject( config ) );
+            MessageBox.Show( "生成完毕" );
         }
 
 
-        static void GetUpdateItems( DirectoryInfo di, List<UpdateItem> list, string excepte_item )
-        {
-           
-            if( di == null )
-            {
-                return;
-            }
-
-
-
-            foreach( var item in di.GetDirectories() )
-            {
-                var temp = new UpdateItem()
-                {
-                    Name = item.Name,
-                    List = new List<UpdateItem>()
-                };
-                list.Add( temp );
-
-                GetUpdateItems( item, temp.List, excepte_item );
-            }
-
-
-            foreach( var item in di.GetFiles() )
-            {
-                if( item.FullName == excepte_item )
-                {
-                    continue;
-                }
-
-                list.Add( new Config.UpdateItem()
-                {
-                    List = null,
-                    Name = item.Name
-                } );
-            }
-
-        }
+        
 
         private void TextBox1_TextChanged( object sender, EventArgs e )
         {

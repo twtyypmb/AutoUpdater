@@ -27,10 +27,6 @@ namespace AutoUpdater
             InitializeComponent();
         }
 
-        private void label6_TextChanged( object sender, EventArgs e )
-        {
-            ControlHorizontally( tips );
-        }
 
         public static void ControlHorizontally( Control c )
         {
@@ -53,14 +49,13 @@ namespace AutoUpdater
             }
 
             HttpClient client = new HttpClient();
-            Stream stream = null;
+            string remote_uri = Config.AutoUpdaterConfig.RemoteUpdateConfig;
             string config = null;
             while( Config.LinkTimes != 0 )
             {
                 try
                 {
-                    config = await client.GetStringAsync( Config.AutoUpdaterConfig.RemoteUpdateConfig );
-                    
+                    config = await client.GetStringAsync( remote_uri );
                     break;
                 }
                 catch( Exception eeee)
@@ -74,22 +69,62 @@ namespace AutoUpdater
             {
                 updater_config = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( config );
             }
-            catch( Exception )
+            catch( Exception eeee)
             {
+                LogFun( "远程更新列表有误" );
                 this.Close();
                 return;
             }
 
+            Uri uri = new Uri( remote_uri );
 
 
-            await DownLoadFiles( updater_config );
+            await DownLoadFiles( updater_config, $"{uri.Scheme}://{uri.Authority}" );
+            tips.Text = "下载完毕";
+            updater_config.RemoteUpdateConfig = remote_uri;
+            SavaConfigFun( updater_config );
 
-
+            if( !string.IsNullOrWhiteSpace( updater_config.LuanchApplication ) )
+            {
+                StartApplication( new FileInfo( updater_config.LuanchApplication ) );
+            }
+            this.Close();
         }
 
-        private async Task DownLoadFiles( AutoUpdaterConfig updater_config )
+        static void StartApplication( FileInfo fi )
         {
-            
+            try
+            {
+                using( Process p = new Process() )
+                {
+                    p.StartInfo.FileName = fi.Name;
+                    p.StartInfo.UseShellExecute = true;
+                    p.StartInfo.WorkingDirectory = fi.DirectoryName;
+                    p.Start();//启动程序
+                }
+            }
+            catch( Exception e)
+            {
+                
+            }
+        }
+
+        public Action<object> LogFun
+        {
+            get;set;
+        }
+
+
+        internal Action<AutoUpdaterConfig> SavaConfigFun
+        {
+            get;set;
+        }
+
+        private async Task DownLoadFiles( AutoUpdaterConfig updater_config, string base_uri )
+        {
+            updater_config.LastUpdateTime = DateTime.Now;
+            await AutoUpdaterHelper.GetUpdateItems( new DirectoryInfo( Environment.CurrentDirectory ), base_uri, "", updater_config.UpdateList, updater_config.UpdateLog, LogFun, s => tips.Text = $"正在下载{s}" );
+            updater_config.UpdateList = null;
         }
 
         private void AutoUpdate_SizeChanged( object sender, EventArgs e )
@@ -109,6 +144,26 @@ namespace AutoUpdater
         internal SelfConfig Config
         {
             get; set;
+        }
+
+        private void tips_Click( object sender, EventArgs e )
+        {
+
+        }
+
+        private void tips_SizeChanged( object sender, EventArgs e )
+        {
+            ControlHorizontally( tips );
+        }
+
+        private void Updater_Load( object sender, EventArgs e )
+        {
+            if( !string.IsNullOrWhiteSpace( this.Config.Background ) && File.Exists( this.Config.Background ) )
+            {
+                this.BackgroundImage = Image.FromFile( this.Config.Background );
+                this.BackgroundImageLayout = ImageLayout.Stretch;
+            }
+            this.WindowState = FormWindowState.Maximized;
         }
     }
 }

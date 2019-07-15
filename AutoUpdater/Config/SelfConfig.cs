@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace AutoUpdater.Config
         }
 
         public AutoUpdaterConfig AutoUpdaterConfig
+        {
+            get;set;
+        }
+
+        public string Background
         {
             get;set;
         }

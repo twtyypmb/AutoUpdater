@@ -6,6 +6,11 @@ namespace AutoUpdater.Config
     {
         public string Name { get; set; }
 
+        public string Version
+        {
+            get;set;
+        }
+
         public List<UpdateItem> List { get; set; }
     }
 }

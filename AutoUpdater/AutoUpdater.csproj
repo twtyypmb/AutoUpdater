@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
@@ -55,6 +56,7 @@
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Config\AutoUpdaterConfig.cs" />
+    <Compile Include="Config\AutoUpdaterHelper.cs" />
     <Compile Include="Config\SelfConfig.cs" />
     <Compile Include="Config\UpdateItem.cs" />
     <Compile Include="Updater.cs">
