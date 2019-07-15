@@ -72,31 +72,32 @@ namespace AutoUpdater.Config
                 if( item.List == null )
                 {
                     now_down( item.Name );
-                    using( var stream = await client.GetStreamAsync( $"{base_uri}/{now_path}/{item.Name} " ) )
+                    try
                     {
-                        string download_item = Path.Combine( di.FullName, item.Name );
-                        if( File.Exists( download_item ) )
+                        using( var stream = await client.GetStreamAsync( $"{base_uri}/{now_path}/{item.Name} " ) )
                         {
-                            var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
-                            if( self.FileVersion?.CompareTo( item?.Version ) >= 0 )
+                            string download_item = Path.Combine( di.FullName, item.Name );
+                            if( File.Exists( download_item ) )
                             {
-                                continue;
+                                var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
+                                if( self.FileVersion?.CompareTo( item?.Version ) >= 0 )
+                                {
+                                    continue;
+                                }
                             }
-                        }
-                        
-                        try
-                        {
+
                             using( var fs = new FileStream( download_item, FileMode.OpenOrCreate ) )
                             {
                                 await stream.CopyToAsync( fs );
                             }
+                            updated_list.Add( Path.Combine( now_path, item.Name ) );
+
                         }
-                        catch( Exception eee)
-                        {
-                            log_fun( eee );
-                            continue;
-                        }
-                        updated_list.Add( Path.Combine( now_path, item.Name ) );
+                    }
+                    catch( Exception eee)
+                    {
+                        log_fun( new Exception($"{item.Name}未正确下载", eee ) );
+                        continue;
                     }
                 }
                 else

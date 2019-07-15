@@ -32,21 +32,16 @@ namespace AutoUpdater
                 string background = "bg.png";
                 int time_span = 3000;
                 int link_times = 10;
-                try
-                {
-                    config_file = ConfigurationManager.AppSettings["config_file"];
-                }
-                catch( Exception ee )
-                {
-
-                }
-
-
-
                 AutoUpdaterConfig updaterConfig = null;
+
                 try
                 {
-                    updaterConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
+                    if( ConfigurationManager.AppSettings.AllKeys.Contains( "config_file" ) )
+                    {
+                        config_file = ConfigurationManager.AppSettings["config_file"];
+                        updaterConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
+                    }
+
                 }
                 catch( Exception e )
                 {
@@ -75,15 +70,14 @@ namespace AutoUpdater
 
                 }
 
-                try
+
+                if( ConfigurationManager.AppSettings.AllKeys.Contains( "config_file" ) )
                 {
                     background = ConfigurationManager.AppSettings["background"];
                 }
-                catch( Exception ee )
-                {
 
-                }
-
+                
+                Log( "----------------------------------------本次更新开始----------------------------------------" );
                 Application.Run( new Updater()
                 {
                     Config = new Config.SelfConfig()
@@ -97,6 +91,7 @@ namespace AutoUpdater
                     SavaConfigFun = s => File.WriteAllText( config_file, Newtonsoft.Json.JsonConvert.SerializeObject( s ) )
 
                 } );
+                Log( "----------------------------------------本次更新结束----------------------------------------" );
             }
         }
 
@@ -131,7 +126,7 @@ namespace AutoUpdater
             {
                 using( var sw = new StreamWriter( fs, System.Text.Encoding.UTF8 ) )
                 {
-                    sw.Write( content.ToString() );
+                    sw.Write( $"{DateTime.Now}:{content.ToString()}{Environment.NewLine}" );
                 }
             }
 
