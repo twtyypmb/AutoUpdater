@@ -53,7 +53,7 @@ namespace AutoUpdater.Config
 
         static HttpClient client = new HttpClient();
 
-        public static async Task GetUpdateItems( DirectoryInfo di, string base_uri, string now_path, List<UpdateItem> list, List<string> updated_list, Action<object> _log_fun, Action<string> _now_down )
+        public static async Task GetUpdateItems( DirectoryInfo di, string base_uri, string now_path, List<UpdateItem> list, List<string> updated_list, List<string>no_updated_list, Action<object> _log_fun, Action<string> _now_down )
         {
             Action<object> log_fun = _log_fun == null ? (s) => { } : _log_fun;
             Action<string> now_down = _now_down == null ? (s) => { }
@@ -83,6 +83,7 @@ namespace AutoUpdater.Config
                                 var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
                                 if( self.FileVersion?.CompareTo( item?.Version ) >= 0 )
                                 {
+                                    no_updated_list.Add( Path.Combine( now_path, item.Name ) );
                                     continue;
                                 }
                             }
@@ -97,6 +98,7 @@ namespace AutoUpdater.Config
                     }
                     catch( Exception eee)
                     {
+                        no_updated_list.Add( Path.Combine( now_path, item.Name ) );
                         log_fun( new Exception($"{item.Name}未正确下载", eee ) );
                         continue;
                     }
@@ -108,9 +110,10 @@ namespace AutoUpdater.Config
                     if( !di_temp.Exists )
                     {
                         di_temp.Create();
+                        di_temp = new DirectoryInfo( $"{di.FullName}/{item.Name}" );
                     }
 
-                    await GetUpdateItems( di_temp,base_uri,$"{now_path}/{item.Name}", item.List, updated_list, log_fun, now_down );
+                    await GetUpdateItems( di_temp,base_uri,$"{now_path}/{item.Name}", item.List, updated_list,no_updated_list, log_fun, now_down );
                 }
             }
         }

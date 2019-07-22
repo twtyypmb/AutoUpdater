@@ -76,7 +76,13 @@ namespace AutoUpdater
                     background = ConfigurationManager.AppSettings["background"];
                 }
 
-                
+                Log( "" );
+                Log( "" );
+                Log( "" );
+                Log( "" );
+                Log( "" );
+                Log( "" );
+                Log( "" );
                 Log( "----------------------------------------本次更新开始----------------------------------------" );
                 Application.Run( new Updater()
                 {

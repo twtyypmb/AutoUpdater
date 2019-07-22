@@ -123,7 +123,7 @@ namespace AutoUpdater
         private async Task DownLoadFiles( AutoUpdaterConfig updater_config, string base_uri )
         {
             updater_config.LastUpdateTime = DateTime.Now;
-            await AutoUpdaterHelper.GetUpdateItems( new DirectoryInfo( Environment.CurrentDirectory ), base_uri, "", updater_config.UpdateList, updater_config.UpdateLog, LogFun, s => tips.Text = $"正在下载{s}" );
+            await AutoUpdaterHelper.GetUpdateItems( new DirectoryInfo( Environment.CurrentDirectory ), base_uri, "", updater_config.UpdateList, updater_config.UpdateLog,updater_config.NoUpdateLog, LogFun, s => tips.Text = $"正在下载{s}" );
             updater_config.UpdateList = null;
         }
 

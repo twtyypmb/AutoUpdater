@@ -19,5 +19,11 @@ namespace AutoUpdater.Config
         {
             get; set;
         } = new List<string>();
+
+
+        public List<string> NoUpdateLog
+        {
+            get; set;
+        } = new List<string>();
     }
 }
