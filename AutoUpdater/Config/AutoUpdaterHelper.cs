@@ -11,7 +11,7 @@ namespace AutoUpdater.Config
 {
     class AutoUpdaterHelper
     {
-        public static void GenerateUpdateItems( DirectoryInfo di, List<UpdateItem> list, string excepte_item )
+        public static void GenerateUpdateItems( DirectoryInfo di, List<UpdateItem> list, string[] excepte_items )
         {
 
             if( di == null )
@@ -30,13 +30,15 @@ namespace AutoUpdater.Config
                 };
                 list.Add( temp );
 
-                GenerateUpdateItems( item, temp.List, excepte_item );
+                GenerateUpdateItems( item, temp.List, excepte_items );
             }
 
 
             foreach( var item in di.GetFiles() )
             {
-                if( item.FullName == excepte_item )
+                
+
+                if( Array.IndexOf( excepte_items, item.FullName ) > 0 )
                 {
                     continue;
                 }

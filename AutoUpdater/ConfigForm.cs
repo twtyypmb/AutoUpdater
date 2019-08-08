@@ -29,14 +29,6 @@ namespace AutoUpdater
 
             DirectoryInfo di = new DirectoryInfo( Environment.CurrentDirectory );
             List<Config.UpdateItem> list = new List<Config.UpdateItem>();
-            if( checkBox1.Checked )
-            {
-                AutoUpdaterHelper.GenerateUpdateItems( di, list, Application.ExecutablePath );
-            }
-            else
-            {
-                AutoUpdaterHelper.GenerateUpdateItems( di, list, null );
-            }
             AutoUpdaterConfig config = new AutoUpdaterConfig();
 
             try
@@ -45,11 +37,26 @@ namespace AutoUpdater
                 {
                     config = jss.Deserialize<AutoUpdaterConfig>( File.ReadAllText( textBox1.Text ) );
                 }
+
+                File.Delete( textBox1.Text );
             }
-            catch( Exception ee)
+            catch( Exception ee )
             {
 
             }
+
+
+
+            if( checkBox1.Checked )
+            {
+                except.Add( Application.ExecutablePath );
+                AutoUpdaterHelper.GenerateUpdateItems( di, list, except.ToArray() );
+            }
+            else
+            {
+                AutoUpdaterHelper.GenerateUpdateItems( di, list, except.ToArray() );
+            }
+
 
             config.LastUpdateTime = DateTime.Now;
             config.UpdateList = list;
@@ -68,6 +75,27 @@ namespace AutoUpdater
         private void ConfigForm_Load( object sender, EventArgs e )
         {
             TextBox1_TextChanged( null, null );
+        }
+        List<string> except = new List<string>();
+        private void listView1_DragDrop( object sender, DragEventArgs e )
+        {
+            string[] arr = e.Data.GetData( DataFormats.FileDrop ) as string[];
+            except.AddRange( arr );
+            foreach( var item in arr )
+            {
+                listView1.Items.Add( new ListViewItem( item ) );
+            }
+            e.Effect = DragDropEffects.None;
+        }
+
+        private void listView1_DragEnter( object sender, DragEventArgs e )
+        {
+            e.Effect = DragDropEffects.Link;
+        }
+
+        private void listView1_SelectedIndexChanged( object sender, EventArgs e )
+        {
+
         }
     }
 }
