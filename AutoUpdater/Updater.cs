@@ -14,6 +14,7 @@ using System.Collections;
 using AutoUpdater.Config;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 
 namespace AutoUpdater
 {
@@ -38,6 +39,12 @@ namespace AutoUpdater
             c.Location = new Point( ( c.Parent.Width - c.Width ) / 2, c.Location.Y );
 
         }
+        static System.Web.Script.Serialization.JavaScriptSerializer jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+
+        static Updater()
+        {
+            jss.RegisterConverters( new JavaScriptConverter[] { new DateTimeConvert() } );
+        }
 
         private async void AutoUpdate_Shown( object sender, EventArgs e )
         {
@@ -50,12 +57,13 @@ namespace AutoUpdater
 
             HttpClient client = new HttpClient();
             string remote_uri = Config.AutoUpdaterConfig.RemoteUpdateConfig;
+            string launch_app = Config.AutoUpdaterConfig.LuanchApplication;
             string config = null;
             while( Config.LinkTimes != 0 )
             {
                 try
                 {
-                    config = await client.GetStringAsync( remote_uri );
+                    config = await client.GetStringAsync( Config.AutoUpdaterConfig.RemoteUpdateConfig );
                     break;
                 }
                 catch( Exception eeee)
@@ -67,7 +75,7 @@ namespace AutoUpdater
             AutoUpdaterConfig updater_config = null;
             try
             {
-                updater_config = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( config );
+                updater_config = jss.Deserialize<AutoUpdaterConfig>( config );
             }
             catch( Exception eeee)
             {
@@ -80,8 +88,16 @@ namespace AutoUpdater
 
 
             await DownLoadFiles( updater_config, $"{uri.Scheme}://{uri.Authority}" );
+            if( string.IsNullOrWhiteSpace( updater_config.RemoteUpdateConfig ) )
+            {
+                updater_config.RemoteUpdateConfig = remote_uri;
+            }
+
+            if( string.IsNullOrWhiteSpace( updater_config.LuanchApplication ) )
+            {
+                updater_config.LuanchApplication = launch_app;
+            }
             tips.Text = "下载完毕";
-            updater_config.RemoteUpdateConfig = remote_uri;
             SavaConfigFun( updater_config );
 
             if( !string.IsNullOrWhiteSpace( updater_config.LuanchApplication ) )
@@ -123,7 +139,7 @@ namespace AutoUpdater
         private async Task DownLoadFiles( AutoUpdaterConfig updater_config, string base_uri )
         {
             updater_config.LastUpdateTime = DateTime.Now;
-            await AutoUpdaterHelper.GetUpdateItems( new DirectoryInfo( Environment.CurrentDirectory ), base_uri, "", updater_config.UpdateList, updater_config.UpdateLog,updater_config.NoUpdateLog, LogFun, s => tips.Text = $"正在下载{s}" );
+            await AutoUpdaterHelper.GetUpdateItems( new DirectoryInfo( Environment.CurrentDirectory ), base_uri, "", updater_config.UpdateList, updater_config, LogFun, s => tips.Text = $"正在下载{s}" );
             updater_config.UpdateList = null;
         }
 

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace AutoUpdater
@@ -18,7 +19,11 @@ namespace AutoUpdater
         {
             InitializeComponent();
         }
-
+        static System.Web.Script.Serialization.JavaScriptSerializer jss = new System.Web.Script.Serialization.JavaScriptSerializer();
+        static ConfigForm()
+        {
+            jss.RegisterConverters( new JavaScriptConverter[] { new DateTimeConvert() } );
+        }
         private void Button1_Click( object sender, EventArgs e )
         {
 
@@ -38,7 +43,7 @@ namespace AutoUpdater
             {
                 if( File.Exists( textBox1.Text ) )
                 {
-                    config = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( textBox1.Text ) );
+                    config = jss.Deserialize<AutoUpdaterConfig>( File.ReadAllText( textBox1.Text ) );
                 }
             }
             catch( Exception ee)
@@ -49,10 +54,9 @@ namespace AutoUpdater
             config.LastUpdateTime = DateTime.Now;
             config.UpdateList = list;
 
-            File.WriteAllText( textBox1.Text, Newtonsoft.Json.JsonConvert.SerializeObject( config ) );
+            File.WriteAllText( textBox1.Text, jss.Serialize( config ) );
             MessageBox.Show( "生成完毕" );
         }
-
 
         
 

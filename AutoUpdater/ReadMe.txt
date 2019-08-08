@@ -1,0 +1,9 @@
+﻿IIS配置步骤
+配置以下MIME类型为text/plain
+.json   
+.ini
+.config
+配置以下MIME类型为application/octet-stream
+.lib    
+.dat 
+在站点【请求筛选】功能配置中删除.config

@@ -53,10 +53,11 @@ namespace AutoUpdater.Config
 
         static HttpClient client = new HttpClient();
 
-        public static async Task GetUpdateItems( DirectoryInfo di, string base_uri, string now_path, List<UpdateItem> list, List<string> updated_list, List<string>no_updated_list, Action<object> _log_fun, Action<string> _now_down )
+        public static async Task GetUpdateItems( DirectoryInfo di, string base_uri, string now_path, List<UpdateItem> list, UpdateLogs logs, Action<object> _log_fun, Action<string> _now_down )
         {
-            Action<object> log_fun = _log_fun == null ? (s) => { } : _log_fun;
-            Action<string> now_down = _now_down == null ? (s) => { }
+            Action<object> log_fun = _log_fun == null ? ( s ) => { }
+            : _log_fun;
+            Action<string> now_down = _now_down == null ? ( s ) => { }
             : _now_down;
             if( di == null || list == null )
             {
@@ -72,34 +73,39 @@ namespace AutoUpdater.Config
             {
                 if( item.List == null )
                 {
+                    string download_item = Path.Combine( di.FullName, item.Name );
+                    if( File.Exists( download_item ) )
+                    {
+                        var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
+                        if( self.FileVersion?.CompareTo( item?.Version ) < 0 )
+                        {
+
+                        }
+                        else
+                        {
+                            logs.SkipUpdateLog.Add( Path.Combine( now_path, item.Name ) );
+                            continue;
+                        }
+                    }
+
+
                     now_down( item.Name );
                     try
                     {
                         using( var stream = await client.GetStreamAsync( $"{base_uri}/{now_path}/{item.Name}" ) )
                         {
-                            string download_item = Path.Combine( di.FullName, item.Name );
-                            if( File.Exists( download_item ) )
-                            {
-                                var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
-                                if( self.FileVersion?.CompareTo( item?.Version ) >= 0 )
-                                {
-                                    no_updated_list.Add( Path.Combine( now_path, item.Name ) );
-                                    continue;
-                                }
-                            }
-
                             using( var fs = new FileStream( download_item, FileMode.OpenOrCreate ) )
                             {
                                 await stream.CopyToAsync( fs );
                             }
-                            updated_list.Add( Path.Combine( now_path, item.Name ) );
+                            logs.UpdateLog.Add( Path.Combine( now_path, item.Name ) );
 
                         }
                     }
-                    catch( Exception eee)
+                    catch( Exception eee )
                     {
-                        no_updated_list.Add( Path.Combine( now_path, item.Name ) );
-                        log_fun( new Exception($"{item.Name}未正确下载", eee ) );
+                        logs.NoUpdateLog.Add( Path.Combine( now_path, item.Name ) );
+                        log_fun( new Exception( $"{item.Name}未正确下载", eee ) );
                         continue;
                     }
                 }
@@ -113,7 +119,7 @@ namespace AutoUpdater.Config
                         di_temp = new DirectoryInfo( $"{di.FullName}/{item.Name}" );
                     }
 
-                    await GetUpdateItems( di_temp,base_uri,$"{now_path}/{item.Name}", item.List, updated_list,no_updated_list, log_fun, now_down );
+                    await GetUpdateItems( di_temp, base_uri, $"{now_path}/{item.Name}", item.List, logs, log_fun, now_down );
                 }
             }
         }

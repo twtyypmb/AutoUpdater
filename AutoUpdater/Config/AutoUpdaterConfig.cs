@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AutoUpdater.Config
 {
-    class AutoUpdaterConfig
+    class AutoUpdaterConfig:UpdateLogs
     {
         public DateTime LastUpdateTime { get; set; }
         public string LuanchApplication { get; set; }
@@ -15,15 +15,6 @@ namespace AutoUpdater.Config
         public List<UpdateItem> UpdateList { get; set; } = new List<UpdateItem>();
 
 
-        public List<string> UpdateLog
-        {
-            get; set;
-        } = new List<string>();
-
-
-        public List<string> NoUpdateLog
-        {
-            get; set;
-        } = new List<string>();
+        
     }
 }

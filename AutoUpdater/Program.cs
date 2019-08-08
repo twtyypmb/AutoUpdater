@@ -1,11 +1,11 @@
 ﻿using AutoUpdater.Config;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
 namespace AutoUpdater
@@ -18,8 +18,7 @@ namespace AutoUpdater
         [STAThread]
         static void Main( string[] args )
         {
-
-            DefaultJsonConvertSetting();
+            jss.RegisterConverters( new JavaScriptConverter[] { new DateTimeConvert() } );
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );
             if( args != null && args.Length > 0 )
@@ -39,14 +38,15 @@ namespace AutoUpdater
                     if( ConfigurationManager.AppSettings.AllKeys.Contains( "config_file" ) )
                     {
                         config_file = ConfigurationManager.AppSettings["config_file"];
-                        
+
                     }
-                    updaterConfig = Newtonsoft.Json.JsonConvert.DeserializeObject<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
+                    updaterConfig = jss.Deserialize<AutoUpdaterConfig>( File.ReadAllText( config_file ) );
                 }
                 catch( Exception e )
                 {
                     Log( e );
-                    MessageBox.Show( "配置出错" );
+                    File.WriteAllText( config_file, jss.Serialize( new AutoUpdaterConfig() ) );
+                    MessageBox.Show( $"配置出错，已生成配置文件{config_file}" );
                     return;
                 }
 
@@ -94,31 +94,16 @@ namespace AutoUpdater
                         Background = background
                     },
                     LogFun = Log,
-                    SavaConfigFun = s => File.WriteAllText( config_file, Newtonsoft.Json.JsonConvert.SerializeObject( s ) )
+                    SavaConfigFun = s => File.WriteAllText( config_file, jss.Serialize( s ) )
 
                 } );
                 Log( "----------------------------------------本次更新结束----------------------------------------" );
             }
         }
 
-        /// <summary>
-        /// Json.net默认转换设置
-        /// </summary>
-        private static void DefaultJsonConvertSetting()
-        {
-            JsonSerializerSettings setting = new JsonSerializerSettings();
-            JsonConvert.DefaultSettings = new Func<JsonSerializerSettings>( () =>
-            {
-                //日期类型默认格式化处理
-                setting.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat;
-                setting.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-                setting.Formatting = Formatting.Indented;
-                //空值处理
-                //setting.NullValueHandling = NullValueHandling.Ignore;
+        static System.Web.Script.Serialization.JavaScriptSerializer jss = new System.Web.Script.Serialization.JavaScriptSerializer();
 
-                return setting;
-            } );
-        }
+
 
 
         private static void Log( object content )
