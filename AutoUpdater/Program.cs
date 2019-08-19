@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
+using AutoUpdater.Config;
 
 namespace AutoUpdater
 {
@@ -18,6 +19,7 @@ namespace AutoUpdater
         [STAThread]
         static void Main( string[] args )
         {
+            
             jss.RegisterConverters( new JavaScriptConverter[] { new DateTimeConvert() } );
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault( false );

@@ -9,7 +9,7 @@ using System.Web;
 
 namespace AutoUpdater.Config
 {
-    class AutoUpdaterHelper
+    static class AutoUpdaterHelper
     {
         public static void GenerateUpdateItems( DirectoryInfo di, List<UpdateItem> list, string[] excepte_items )
         {
@@ -36,7 +36,7 @@ namespace AutoUpdater.Config
 
             foreach( var item in di.GetFiles() )
             {
-                
+
 
                 if( Array.IndexOf( excepte_items, item.FullName ) > 0 )
                 {
@@ -79,7 +79,7 @@ namespace AutoUpdater.Config
                     if( File.Exists( download_item ) )
                     {
                         var self = System.Diagnostics.FileVersionInfo.GetVersionInfo( download_item );
-                        if( self.FileVersion?.CompareTo( item?.Version ) < 0 )
+                        if( self.FileVersion?.CompareVersionTo( item?.Version ) < 0 )
                         {
 
                         }
@@ -125,5 +125,64 @@ namespace AutoUpdater.Config
                 }
             }
         }
+
+        public static int CompareVersionTo( this string this_version, string other_version )
+        {
+            int c1 = 0;
+            int c2 = 0;
+            do
+            {
+                if( this_version == null )
+                {
+                    c1 = 0;
+                    break;
+                }
+
+                if( other_version == null )
+                {
+                    c2 = 0;
+                    break;
+                }
+
+
+                var c1r = this_version.Split( '.' );
+                var c2r = other_version.Split( '.' );
+
+                if( c1r.Length != 4 )
+                {
+                    throw new Exception( "source version error" );
+                }
+
+
+                if( c2r.Length != 4 )
+                {
+                    throw new Exception( "target version error" );
+                }
+
+
+                for( int i = 0; i < 4; i++ )
+                {
+                    c1 = Convert.ToInt32( c1r[i] );
+                    c2 = Convert.ToInt32( c2r[i] );
+                    if( c1 == c2 )
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                break;
+
+            } while( true );
+
+
+
+
+
+            return c1 - c2;
+        }
+
     }
 }
