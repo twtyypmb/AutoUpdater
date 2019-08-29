@@ -11,6 +11,8 @@ namespace AutoUpdater.Config
             get;set;
         }
 
+        public string Md5 { get; set; }
+
         public List<UpdateItem> List { get; set; }
     }
 }
